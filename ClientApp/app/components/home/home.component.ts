@@ -15,6 +15,13 @@ export class HomeComponent {
     constructor(private http: Http, @Inject('BASE_URL') baseUrl: string){
         this.baseUrl =  baseUrl;
         this.performSearch('');
+        this.orderLines = [
+            {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Bread"},
+            {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Ham"},
+            {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Milk"},
+            {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Butter"},
+            {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Potato"}
+       ];
     }
 
     performSearch(searchTerm: string){
@@ -27,17 +34,20 @@ export class HomeComponent {
     }
     
     editOrder(orderId: number){
-        console.log(`Order edited: ${orderId}`);
-        
-        this.orderLines = [
-             {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Bread"},
-             {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Ham"},
-             {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Milk"},
-             {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Butter"},
-             {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Potato"}
-
-        ];
+        console.log(`Order edited: ${orderId}`);   
     }
+
+    deleteOrder(orderId: number){
+        let index = this.orders.findIndex(order => order.id === orderId);
+        this.orders.splice(index, 1);
+    }
+
+    deleteOrderLine(orderLineId: number){
+        let index = this.orderLines.findIndex(orderLine => orderLine.id === orderLineId);
+        this.orderLines.splice(index, 1);
+    }
+
+    
 }
 
 interface Order {

@@ -1,6 +1,12 @@
 <input #searchTerm>
-<button (click)="performSearch(searchTerm.value)">Search</button>
+<button (click)="performSearch(searchTerm.value)">Search</button><br>
+<br>
+<br>
+<input #customerName><button (click)="addOrder(customerName.value)">AddOrder</button><br>
 
+<br>
+<br>
+<br>
 <table>
     <tr><td>Id</td><td>Customer Name</td><td>Total Price</td></tr>
     <tr *ngFor="let order of orders">
@@ -8,6 +14,7 @@
             <td>{{ order.customerName }}</td>
             <td>{{ order.totalPrice }}</td>
             <td> <button (click)="editOrder(order.id)">Edit</button> </td>
+            <td> <button (click)="deleteOrder(order.id)">Delete</button> </td>
     </tr>
 </table>
 
@@ -16,10 +23,10 @@
         <tr><td>Product</td><td>Price</td><td>Quantity</td><td>Total Price</td></tr>
         <tr *ngFor="let orderLine of orderLines">
                 <td>{{ orderLine.productName }}</td>
-                <td>{{ orderLine.price }}</td>
+                <td>{{ orderLine.productPrice }}</td>
                 <td>{{ orderLine.quantity }}</td>
-                <td>{{ orderLine.quantity * orderLine.price }}</td>
-                <td> <button (click)="editOrder(order.id)">Edit</button> </td>
+                <td>{{ orderLine.quantity * orderLine.productPrice }}</td>
+                <td> <button (click)="deleteOrderLine(orderLine.id)">Delete</button> </td>
         </tr>
     </table>
 
