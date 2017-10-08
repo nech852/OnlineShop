@@ -2,7 +2,7 @@
 <button (click)="performSearch(searchTerm.value)">Search</button><br>
 <br>
 <br>
-<input #customerName><button (click)="addOrder(customerName.value)">AddOrder</button><br>
+<input #customerName><button (click)="addOrder(customerName.value)">Add Order</button><br>
 
 <br>
 <br>
@@ -30,5 +30,10 @@
         </tr>
     </table>
 
+<button (click)="addOrderLine(customerName.value)">Add Product</button><br>
 
-
+<select>
+    <option *ngFor="product of products" value={{product.Id}}> 
+        {{product.Name}}
+    </option>
+</select>

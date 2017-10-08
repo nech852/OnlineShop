@@ -11,6 +11,7 @@ export class HomeComponent {
     private baseUrl: string;
     orders: Order[];
     orderLines: OrderLine[];
+    products: Product[];
 
     constructor(private http: Http, @Inject('BASE_URL') baseUrl: string){
         this.baseUrl =  baseUrl;
@@ -21,6 +22,14 @@ export class HomeComponent {
             {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Milk"},
             {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Butter"},
             {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Potato"}
+       ];
+
+       this.products = [
+            {id: 1,  price: 4.5, name: "Bread"},
+            {id: 1,  price: 4.5, name: "Ham"},
+            {id: 1,  price: 4.5, name: "Milk"},
+            {id: 1,  price: 4.5, name: "Butter"},
+            {id: 1,  price: 4.5, name: "Potato"},
        ];
     }
 
@@ -47,6 +56,10 @@ export class HomeComponent {
         this.orderLines.splice(index, 1);
     }
 
+    addOrder(customerName: string){
+        this. orders.push({id:1, customerName:customerName, totalPrice:24});
+    }
+
     
 }
 
@@ -63,4 +76,10 @@ class OrderLine {
     productName: string;
     productPrice: number;
     quantity: number;
+}
+
+class Product {
+    id: number;
+    name: string;
+    price: number;
 }
