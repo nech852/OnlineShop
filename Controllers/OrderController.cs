@@ -29,6 +29,16 @@ namespace OnlineShop.Controllers
             new Product{Id = 5,  Price = 8, Name =  "Potato"},
         };
 
+        private static OrderLine[] orderLines = new []
+        {
+            new OrderLine{Id = 1, OrderId = 1, ProductId = 1, ProductPrice = 4.5f, Quantity = 6, ProductName = "Bread" },
+            new OrderLine{Id = 2, OrderId = 1, ProductId = 1, ProductPrice = 4.5f, Quantity = 6, ProductName = "Ham" },
+            new OrderLine{Id = 3, OrderId = 1, ProductId = 1, ProductPrice = 4.5f, Quantity = 6, ProductName = "Potato" },
+            new OrderLine{Id = 4, OrderId = 1, ProductId = 1, ProductPrice = 4.5f, Quantity = 6, ProductName = "Tomato" },
+            new OrderLine{Id = 5, OrderId = 1, ProductId = 1, ProductPrice = 4.5f, Quantity = 6, ProductName = "Onion" },
+            new OrderLine{Id = 6, OrderId = 1, ProductId = 1, ProductPrice = 4.5f, Quantity = 6, ProductName = "Garlic" },
+        };
+
         [HttpGet("[action]")]
         public IEnumerable<Order> Search(string mask)
         {
@@ -44,11 +54,28 @@ namespace OnlineShop.Controllers
         [HttpGet("[action]")]
         public IEnumerable<Product> Product()
         {
-
             return products;
         }
 
-    
+        [HttpGet("[action]")]
+        public IEnumerable<OrderLine> OrderLine(int orderId)
+        {
+            return orderLines;
+        }
+
+        [HttpPost]
+        public IEnumerable AddProduct([FromBody] int orderId, [FromBody] int productId, [FromBody] int quantity)
+        {
+            Order order = orders.Single(ord => ord.Id == orderId);
+            Product product = products.Single(prod => prod.Id == productId);
+            var orderLine = 
+                new OrderLine { 
+                    Id = 6, OrderId = orderId, ProductId = productId,
+                    ProductPrice = product.Price, Quantity = quantity, ProductName = product.Name 
+                 };
+            orderLines.RemoveAll
+        }
+
     }
 
     

@@ -12,49 +12,37 @@ export class HomeComponent {
     orders: Order[];
     orderLines: OrderLine[];
     products: Product[];
+    currentOrder: Order;
 
     constructor(private http: Http, @Inject('BASE_URL') baseUrl: string){
         this.baseUrl =  baseUrl;
         this.performSearch('');
-        this.orderLines = [
-            {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Bread"},
-            {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Ham"},
-            {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Milk"},
-            {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Butter"},
-            {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Potato"}
-       ];
 
         this.http.get(`${this.baseUrl}api/Order/Product`).subscribe(result => {
-            console.log(`Response is received`);
             this.products = result.json() as Product[];
             }, error => console.error(error));
-
-    //    this.products = [
-    //         {id: 1,  price: 4.5, name: "Bread"},
-    //         {id: 1,  price: 4.5, name: "Ham"},
-    //         {id: 1,  price: 4.5, name: "Milk"},
-    //         {id: 1,  price: 4.5, name: "Butter"},
-    //         {id: 1,  price: 4.5, name: "Potato"},
-    //    ];
     }
 
     performSearch(searchTerm: string){
         console.log(`User entered: ${searchTerm}`);
         this.http.get(`${this.baseUrl}api/Order/Search?mask=${searchTerm}`).subscribe(result => {
-            console.log(`Response is received`);
             this.orders = result.json() as Order[];
-            console.log(this.orders);
         }, error => console.error(error));
     }
     
     editOrder(orderId: number){
-        console.log(`Order edited: ${orderId}`);   
+        this.http.get(`${this.baseUrl}api/Order/OrderLine?orderId=${orderId}`).subscribe(result => {
+            this.orderLines = result.json() as OrderLine[];
+            let index = this.orders.findIndex(order => order.id === orderId);
+            this.currentOrder = this.orders[index];
+        }, error => console.error(error));
     }
 
     deleteOrder(orderId: number){
         let index = this.orders.findIndex(order => order.id === orderId);
         this.orders.splice(index, 1);
     }
+
 
     deleteOrderLine(orderLineId: number){
         let index = this.orderLines.findIndex(orderLine => orderLine.id === orderLineId);
