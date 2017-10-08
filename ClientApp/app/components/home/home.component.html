@@ -30,10 +30,12 @@
         </tr>
     </table>
 
-<button (click)="addOrderLine(customerName.value)">Add Product</button><br>
+<button (click)="addOrderLine(product.value*1, productQuantity.value*1)">Add Product</button><br>
 
-<select>
-    <option *ngFor="product of products" value={{product.Id}}> 
-        {{product.Name}}
+<select #product>
+    <option  *ngFor="let product of products" value="{{product.id}}"> 
+        {{product.name}} - {{product.price}}
     </option>
 </select>
+<label>Count</label>
+<input #productQuantity value="1">

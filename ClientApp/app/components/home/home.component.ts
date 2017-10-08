@@ -24,13 +24,18 @@ export class HomeComponent {
             {id: 1, orderId: 1, productId:1, productPrice: 4.5, quantity: 3, productName: "Potato"}
        ];
 
-       this.products = [
-            {id: 1,  price: 4.5, name: "Bread"},
-            {id: 1,  price: 4.5, name: "Ham"},
-            {id: 1,  price: 4.5, name: "Milk"},
-            {id: 1,  price: 4.5, name: "Butter"},
-            {id: 1,  price: 4.5, name: "Potato"},
-       ];
+        this.http.get(`${this.baseUrl}api/Order/Product`).subscribe(result => {
+            console.log(`Response is received`);
+            this.products = result.json() as Product[];
+            }, error => console.error(error));
+
+    //    this.products = [
+    //         {id: 1,  price: 4.5, name: "Bread"},
+    //         {id: 1,  price: 4.5, name: "Ham"},
+    //         {id: 1,  price: 4.5, name: "Milk"},
+    //         {id: 1,  price: 4.5, name: "Butter"},
+    //         {id: 1,  price: 4.5, name: "Potato"},
+    //    ];
     }
 
     performSearch(searchTerm: string){
@@ -60,6 +65,15 @@ export class HomeComponent {
         this. orders.push({id:1, customerName:customerName, totalPrice:24});
     }
 
+    addOrderLine(productId: number, quantity: number){
+        let index = this.products.findIndex(prod => prod.id === productId);
+        if(index < 0)
+        {
+            return;
+        }
+        let product = this.products[index];
+        this.orderLines.push( {id: 1, orderId: 1, productId: product.id, productPrice: product.price, quantity: quantity, productName: product.name});
+    }
     
 }
 
