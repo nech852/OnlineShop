@@ -13,6 +13,8 @@ export class HomeComponent {
     orderLines: OrderLine[];
     products: Product[];
     currentOrder: Order;
+    orderId: number;
+
 
     constructor(private http: Http, @Inject('BASE_URL') baseUrl: string){
         this.baseUrl =  baseUrl;
@@ -35,6 +37,7 @@ export class HomeComponent {
             this.orderLines = result.json() as OrderLine[];
             let index = this.orders.findIndex(order => order.id === orderId);
             this.currentOrder = this.orders[index];
+            this.orderId = orderId;
         }, error => console.error(error));
     }
 
@@ -50,17 +53,32 @@ export class HomeComponent {
     }
 
     addOrder(customerName: string){
-        this. orders.push({id:1, customerName:customerName, totalPrice:24});
+        this.http.post(`${this.baseUrl}api/Order/AddOrder`, {CustomerName: customerName}).subscribe(result => 
+            {
+                this.orders = result.json() as Order[];
+            }, 
+            error => console.error(error));
     }
 
-    addOrderLine(productId: number, quantity: number){
-        let index = this.products.findIndex(prod => prod.id === productId);
-        if(index < 0)
-        {
-            return;
-        }
-        let product = this.products[index];
-        this.orderLines.push( {id: 1, orderId: 1, productId: product.id, productPrice: product.price, quantity: quantity, productName: product.name});
+    addOrderLine(productId: number, quantity: number) {
+        this.http.post(`${this.baseUrl}api/Order/AddProductLine`, 
+        {OrderId: this.orderId, ProductId: productId, Quantity: quantity}).subscribe(result => 
+            {
+                this.orderLines = result.json() as OrderLine[];
+                let totalPrice: number = 0;
+                
+                for(let orderLine of this.orderLines) {
+                    for(let product of this.products) {
+                        if(product.id === orderLine.productId){
+                            totalPrice += orderLine.quantity * product.price;
+                            break;
+                        }
+                    }
+                }
+
+                this.currentOrder.totalPrice = totalPrice;
+            }, 
+            error => console.error(error));
     }
     
 }
