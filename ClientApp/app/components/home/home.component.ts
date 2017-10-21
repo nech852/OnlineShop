@@ -12,8 +12,9 @@ export class HomeComponent {
     orders: Order[];
     orderLines: OrderLine[];
     products: Product[];
-    currentOrder: Order;
+    currentOrder?: Order;
     orderId: number;
+    searchMask: string;
 
 
     constructor(private http: Http, @Inject('BASE_URL') baseUrl: string){
@@ -29,6 +30,7 @@ export class HomeComponent {
         console.log(`User entered: ${searchTerm}`);
         this.http.get(`${this.baseUrl}api/Order/Search?mask=${searchTerm}`).subscribe(result => {
             this.orders = result.json() as Order[];
+            this.searchMask = searchTerm;
         }, error => console.error(error));
     }
     
@@ -42,14 +44,33 @@ export class HomeComponent {
     }
 
     deleteOrder(orderId: number){
-        let index = this.orders.findIndex(order => order.id === orderId);
-        this.orders.splice(index, 1);
+
+        this.http.delete(`${this.baseUrl}api/Order/DeleteOrder`,
+            {body: {OrderId: orderId, Mask: this.searchMask}}).subscribe(result => {
+            this.orders = result.json() as Order[];
+            if(this.orderId === orderId){
+                if(this.orders.length > 0){
+                    this.editOrder(0);
+                }
+                else {
+                    this.currentOrder = undefined;
+                    this.orderId = -1;
+                    this.orderLines = [];
+                }
+            }
+        }, error => console.error(error));
+
     }
 
 
     deleteOrderLine(orderLineId: number){
-        let index = this.orderLines.findIndex(orderLine => orderLine.id === orderLineId);
-        this.orderLines.splice(index, 1);
+        let currentOrder = this.orderId;
+        this.http.delete(`${this.baseUrl}api/Order/DeleteOrderLine`,
+        {body: {OrderLineId: orderLineId, OrderId: this.orderId }}).subscribe(result => {
+            if(this.orderId === currentOrder){
+                this.orderLines = result.json() as OrderLine[];    
+            }
+        }, error => console.error(error));
     }
 
     addOrder(customerName: string){
@@ -61,6 +82,7 @@ export class HomeComponent {
     }
 
     addOrderLine(productId: number, quantity: number) {
+
         this.http.post(`${this.baseUrl}api/Order/AddProductLine`, 
         {OrderId: this.orderId, ProductId: productId, Quantity: quantity}).subscribe(result => 
             {
@@ -74,6 +96,10 @@ export class HomeComponent {
                             break;
                         }
                     }
+                }
+
+                if(this.currentOrder === undefined){
+                    return;
                 }
 
                 this.currentOrder.totalPrice = totalPrice;

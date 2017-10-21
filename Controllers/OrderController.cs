@@ -42,10 +42,6 @@ namespace OnlineShop.Controllers
         [HttpGet("[action]")]
         public IEnumerable<Order> Search(string mask)
         {
-            // if(string.IsNullOrWhiteSpace(mask))
-            // {
-            //     return Enumerable.Empty<Order>();
-            // }
             return orders.Where(order => string.IsNullOrWhiteSpace(mask) ||
                 order.CustomerName.IndexOf(mask, StringComparison.OrdinalIgnoreCase) >= 0).
                 Select(order => new Order {Id = order.Id, CustomerName = order.CustomerName, 
@@ -66,15 +62,21 @@ namespace OnlineShop.Controllers
             return Search(string.Empty);
         }
 
-//         http.delete('/api/something', new RequestOptions({
-//    headers: headers,
-//    body: anyObject
-// }))
 
         [HttpDelete("[action]")]
         public IEnumerable<Order> DeleteOrder([FromBody] DeleteOrderArg deleteOrderArg)
         {
-            orders.Remove
+            orders.RemoveAll(ord => ord.Id == deleteOrderArg.OrderId);
+            return Search(deleteOrderArg.Mask);
+        }
+
+        
+        [HttpDelete("[action]")]
+        public IEnumerable<OrderLine> DeleteOrderLine([FromBody] DeleteOrderLineArgs args)
+        {
+            //TODO: handle situations when order or order line is not found
+            orderLineDtos.RemoveAll(ordLine => ordLine.Id == args.OrderLineId);
+            return OrderLine(args.OrderId);
         }
 
 
@@ -98,8 +100,10 @@ namespace OnlineShop.Controllers
         }
 
 
+        //TODO: Rename to productLineCounter
         private static int productLineCounter = 10;
         
+        //TODO: Rename to AddOrderLine
         [HttpPost("[action]")]
         public IEnumerable<OrderLine> AddProductLine([FromBody] NewOrderLine newOrderLine)
         {           
