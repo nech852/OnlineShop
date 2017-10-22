@@ -11,100 +11,92 @@ namespace OnlineShop.Controllers
     [Route("api/[controller]")]
     public class OrderController : Controller
     {
-        //TODO: add underscore
-        private OrderContext orderContext;
+        private OrderContext _orderContext;
 
         public OrderController(OrderContext orderContext)
         {
-            this.orderContext = orderContext;
+            this._orderContext = orderContext;
         }
 
-        [HttpGet("[action]")]
-        public IEnumerable<Order> Search(string mask)
+        [HttpGet("Orders")]
+        public async Task<IEnumerable<Order>> GetOrders(string mask)
         {
-            IQueryable<Order> allOrders = orderContext.Orders.Select(order => new Order {Id = order.Id,
+            IQueryable<Order> allOrders = _orderContext.Orders.Select(order => new Order {Id = order.Id,
                 CustomerName = order.CustomerName, 
                 TotalPrice = order.OrderLines.Select(line => line.Quantity * line.Product.Price).Sum()});
             IQueryable<Order> result = allOrders;
             if(!string.IsNullOrWhiteSpace(mask)){
-                result = allOrders.Where(order => EF.Functions.Like(order.CustomerName, mask.Trim()));
+                result = allOrders.Where(order => EF.Functions.Like(order.CustomerName, $"%{mask.Trim()}%"));
             }
-            return result.ToList();
+            return await result.ToListAsync();
         }
 
         [HttpPost("[action]")]
-        public IEnumerable<Order> AddOrder([FromBody] NewOrder newOrder)
+        public async Task<IEnumerable<Order>> AddOrder([FromBody] NewOrderArgs args)
         {
-            string customerName = newOrder.CustomerName;
-            orderContext.Orders.Add(new OrderDto { CustomerName = customerName });
-            orderContext.SaveChanges();
-            //TODO: search by mask; specify current mask on UI
-            return Search(string.Empty);
+            _orderContext.Orders.Add(new OrderDto { CustomerName = args.CustomerName});
+            await _orderContext.SaveChangesAsync();
+            return await GetOrders(args.Mask);
         }
 
 
-        //Rename "DeleteOrderArg deleteOrderArg" to "DeleteOrderArgs args"
         [HttpDelete("[action]")]
-        public IEnumerable<Order> DeleteOrder([FromBody] DeleteOrderArg deleteOrderArg)
+        public async Task<IEnumerable<Order>> DeleteOrder([FromBody] DeleteOrderArgs args)
         {
-            OrderDto orderDto = new OrderDto { Id = deleteOrderArg.OrderId };
-            orderContext.Entry(orderDto).State = EntityState.Deleted;
-            orderContext.SaveChanges();
-            //orderContext.Orders.RemoveRange(ord => ord.Id == deleteOrderArg.OrderId);
-            return Search(deleteOrderArg.Mask);
+            OrderDto orderDto = new OrderDto { Id = args.OrderId };
+            _orderContext.Entry(orderDto).State = EntityState.Deleted;
+            await _orderContext.SaveChangesAsync();
+            return await GetOrders(args.Mask);
         }
         
         [HttpDelete("[action]")]
-        public IEnumerable<OrderLine> DeleteOrderLine([FromBody] DeleteOrderLineArgs args)
+        public async Task<IEnumerable<OrderLine>> DeleteOrderLine([FromBody] DeleteOrderLineArgs args)
         {
             OrderLineDto orderLine = new OrderLineDto { Id = args.OrderLineId };
-            orderContext.Entry(orderLine).State = EntityState.Deleted;
+            _orderContext.Entry(orderLine).State = EntityState.Deleted;
             //TODO: handle situations when order or order line is not found
-            //orderContext.OrderLines.RemoveRange(ordLine => ordLine.Id == args.OrderLineId);
-            orderContext.SaveChanges();
-            return OrderLine(args.OrderId);
+            await _orderContext.SaveChangesAsync();
+            return await GetOrderLines(args.OrderId);
         }
 
 
-        [HttpGet("[action]")]
-        public IEnumerable<Product> Product()
+        [HttpGet("Products")]
+        public async Task<IEnumerable<ProductDto>> GetProducts()
         {
-            //return new List<Product>();
-            var result = orderContext.Products.ToList();
+            var result = await _orderContext.Products.ToListAsync();
             return result;
         }
 
-        [HttpGet("[action]")]
-        public IEnumerable<OrderLine> OrderLine(int orderId)
+        [HttpGet("OrderLines")]
+        public async Task<IEnumerable<OrderLine>> GetOrderLines(int orderId)
         {
-            return orderContext.OrderLines.Where(ol => ol.OrderId == orderId).
+            return await _orderContext.OrderLines.Where(ol => ol.OrderId == orderId).
                        Select(ol => new OrderLine()
                         {
                             Id=ol.Id, OrderId = ol.OrderId, ProductId = ol.ProductId,
                             Quantity = ol.Quantity, 
                             ProductName = ol.Product.Name,
                             ProductPrice = ol.Product.Price,
-                        }).ToList();
+                        }).ToListAsync();
         }
         
-        //TODO: Rename to AddOrderLine
         [HttpPost("[action]")]
-        public IEnumerable<OrderLine> AddProductLine([FromBody] NewOrderLine newOrderLine)
+        public async Task<IEnumerable<OrderLine>> AddOrderLine([FromBody] NewOrderLineArgs args)
         {       
-            OrderLineDto orderLine = orderContext.OrderLines.SingleOrDefault(line => line.OrderId == newOrderLine.OrderId
-             && line.ProductId == newOrderLine.ProductId);
+            OrderLineDto orderLine = _orderContext.OrderLines.SingleOrDefault(line => line.OrderId == args.OrderId
+                && line.ProductId == args.ProductId);
              if(orderLine == null) 
              {
                 orderLine = 
-                    new OrderLineDto {OrderId = newOrderLine.OrderId, ProductId = newOrderLine.ProductId};
-                orderContext.OrderLines.Add(orderLine);    
+                    new OrderLineDto { OrderId = args.OrderId, ProductId = args.ProductId };
+                _orderContext.OrderLines.Add(orderLine);    
              }
 
-             orderLine.Quantity += newOrderLine.Quantity;
+             orderLine.Quantity += args.Quantity;
 
-             orderContext.SaveChanges();
+             await _orderContext.SaveChangesAsync();
 
-             return OrderLine(newOrderLine.OrderId);
+             return await GetOrderLines(args.OrderId);
         }
 
     }

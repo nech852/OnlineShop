@@ -1,6 +1,8 @@
 <input #searchTerm>
 <button (click)="performSearch(searchTerm.value)">Search</button><br>
 <br>
+    Current Search Mask: {{searchMask}}
+<br>
 <br>
 <input #customerName><button (click)="addOrder(customerName.value)">Add Order</button><br>
 

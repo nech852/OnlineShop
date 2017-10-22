@@ -1,6 +1,6 @@
 namespace OnlineShop.Data
 {       
-    public class NewOrderLine
+    public class NewOrderLineArgs
     {
         public int OrderId { get; set;}
         public int ProductId { get; set;}

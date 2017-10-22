@@ -10,24 +10,19 @@ namespace OnlineShop.Data
 
         public DbSet<OrderDto> Orders { get; set; }
         public DbSet<OrderLineDto> OrderLines { get; set; }
-        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductDto> Products { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<OrderDto>().ToTable("Order");
             modelBuilder.Entity<OrderLineDto>().ToTable("OrderLine");
-            modelBuilder.Entity<Product>().ToTable("Product");
+            modelBuilder.Entity<ProductDto>().ToTable("Product");
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.EnableSensitiveDataLogging();
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
         }
     }
 

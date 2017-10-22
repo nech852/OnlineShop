@@ -21,21 +21,21 @@ export class HomeComponent {
         this.baseUrl =  baseUrl;
         this.performSearch('');
 
-        this.http.get(`${this.baseUrl}api/Order/Product`).subscribe(result => {
+        this.http.get(`${this.baseUrl}api/Order/Products`).subscribe(result => {
             this.products = result.json() as Product[];
             }, error => console.error(error));
     }
 
     performSearch(searchTerm: string){
         console.log(`User entered: ${searchTerm}`);
-        this.http.get(`${this.baseUrl}api/Order/Search?mask=${searchTerm}`).subscribe(result => {
+        this.http.get(`${this.baseUrl}api/Order/Orders?mask=${searchTerm}`).subscribe(result => {
             this.orders = result.json() as Order[];
             this.searchMask = searchTerm;
         }, error => console.error(error));
     }
     
     editOrder(orderId: number){
-        this.http.get(`${this.baseUrl}api/Order/OrderLine?orderId=${orderId}`).subscribe(result => {
+        this.http.get(`${this.baseUrl}api/Order/OrderLines?orderId=${orderId}`).subscribe(result => {
             this.orderLines = result.json() as OrderLine[];
             let index = this.orders.findIndex(order => order.id === orderId);
             this.currentOrder = this.orders[index];
@@ -74,7 +74,7 @@ export class HomeComponent {
     }
 
     addOrder(customerName: string){
-        this.http.post(`${this.baseUrl}api/Order/AddOrder`, {CustomerName: customerName}).subscribe(result => 
+        this.http.post(`${this.baseUrl}api/Order/AddOrder`, {CustomerName: customerName, Mask: this.searchMask}).subscribe(result => 
             {
                 this.orders = result.json() as Order[];
             }, 
@@ -83,7 +83,7 @@ export class HomeComponent {
 
     addOrderLine(productId: number, quantity: number) {
 
-        this.http.post(`${this.baseUrl}api/Order/AddProductLine`, 
+        this.http.post(`${this.baseUrl}api/Order/AddOrderLine`, 
         {OrderId: this.orderId, ProductId: productId, Quantity: quantity}).subscribe(result => 
             {
                 this.orderLines = result.json() as OrderLine[];
@@ -109,6 +109,7 @@ export class HomeComponent {
     
 }
 
+//TODO: move to separate classes
 interface Order {
     id: number;
     customerName: string;

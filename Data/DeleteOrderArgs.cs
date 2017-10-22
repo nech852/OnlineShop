@@ -1,6 +1,6 @@
 namespace OnlineShop.Data
 {       
-    public class DeleteOrderArg
+    public class DeleteOrderArgs
     {
         public string Mask {get; set;}
         public int OrderId { get; set; }
