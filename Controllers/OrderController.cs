@@ -4,12 +4,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using OnlineShop.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace OnlineShop.Controllers
 {
     [Route("api/[controller]")]
     public class OrderController : Controller
     {
+        private OrderContext orderContext;
+
+        public OrderController(OrderContext orderContext)
+        {
+            this.orderContext = orderContext;
+        }
         private static List<OrderDto> orders = new List<OrderDto>()
         {
             new OrderDto { Id = 1, CustomerName ="John"},
@@ -42,12 +49,14 @@ namespace OnlineShop.Controllers
         [HttpGet("[action]")]
         public IEnumerable<Order> Search(string mask)
         {
-            return orders.Where(order => string.IsNullOrWhiteSpace(mask) ||
-                order.CustomerName.IndexOf(mask, StringComparison.OrdinalIgnoreCase) >= 0).
-                Select(order => new Order {Id = order.Id, CustomerName = order.CustomerName, 
-                TotalPrice = orderLineDtos.Where(oL => oL.OrderId == order.Id).
-                Select(oL => oL.Quantity * products.Single(pr => pr.Id == oL.ProductId).Price).Sum()})
-                    .AsEnumerable();
+            IQueryable<Order> allOrders = orderContext.Orders.Select(order => new Order {Id = order.Id,
+                CustomerName = order.CustomerName, 
+                TotalPrice = order.OrderLines.Select(line => line.Quantity * line.Product.Price).Sum()});
+            IQueryable<Order> result = allOrders;
+            if(!string.IsNullOrWhiteSpace(mask)){
+                result = allOrders.Where(order => EF.Functions.Like(order.CustomerName, mask.Trim()));
+            }
+            return result.AsEnumerable();
         }
 
         
