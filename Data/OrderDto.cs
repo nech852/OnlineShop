@@ -4,7 +4,7 @@ namespace OnlineShop.Data
 {
     public class OrderDto
     {
-        public int Id { get; set;}
+        public long Id { get; set;}
         public string CustomerName {get; set;}
         public IList<OrderLineDto> OrderLines {get; set;}
     }

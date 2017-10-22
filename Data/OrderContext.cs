@@ -1,15 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace OnlineShop.Data
 {
     public class OrderContext : DbContext
-    {
-        private ILoggerFactory _loggerFactory;
-
-        public OrderContext(DbContextOptions<OrderContext> options, ILoggerFactory loggerFactory) : base(options)
+    {        
+        public OrderContext(DbContextOptions<OrderContext> options) : base(options)
         {
-            _loggerFactory = loggerFactory;
         }
 
         public DbSet<OrderDto> Orders { get; set; }
@@ -27,7 +23,6 @@ namespace OnlineShop.Data
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.EnableSensitiveDataLogging();
-            // optionsBuilder.UseLoggerFactory(_loggerFactory);
         }
 
         public override void Dispose()
