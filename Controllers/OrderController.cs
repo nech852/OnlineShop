@@ -43,8 +43,11 @@ namespace OnlineShop.Controllers
         [HttpDelete("[action]")]
         public async Task<IEnumerable<Order>> DeleteOrder([FromBody] DeleteOrderArgs args)
         {
-            OrderDto orderDto = new OrderDto { Id = args.OrderId };
-            _orderContext.Entry(orderDto).State = EntityState.Deleted;
+            // OrderDto orderDto = new OrderDto { Id = args.OrderId };
+            // _orderContext.Entry(orderDto).State = EntityState.Deleted;
+            OrderDto orderDto = _orderContext.Orders.Include(ord => ord.OrderLines).Single(ord => ord.Id == args.OrderId);
+            _orderContext.RemoveRange(orderDto.OrderLines);
+            _orderContext.Remove(orderDto);
             await _orderContext.SaveChangesAsync();
             return await GetOrders(args.Mask);
         }

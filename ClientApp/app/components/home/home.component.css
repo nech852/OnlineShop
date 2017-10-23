@@ -10,3 +10,7 @@ td {
 table {
     margin: 6px;
 }
+
+tr.selected{
+    background: aquamarine;
+}

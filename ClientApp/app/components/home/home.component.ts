@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { Http, Response } from '@angular/http';
+import { Order, OrderLine, Product} from './entities';
 
 @Component({
     selector: 'home',
@@ -13,7 +14,7 @@ export class HomeComponent {
     orderLines: OrderLine[];
     products: Product[];
     currentOrder?: Order;
-    orderId: number;
+    currentOrderId: number;
     searchMask: string;
 
 
@@ -39,7 +40,7 @@ export class HomeComponent {
             this.orderLines = result.json() as OrderLine[];
             let index = this.orders.findIndex(order => order.id === orderId);
             this.currentOrder = this.orders[index];
-            this.orderId = orderId;
+            this.currentOrderId = orderId;
         }, error => console.error(error));
     }
 
@@ -48,15 +49,10 @@ export class HomeComponent {
         this.http.delete(`${this.baseUrl}api/Order/DeleteOrder`,
             {body: {OrderId: orderId, Mask: this.searchMask}}).subscribe(result => {
             this.orders = result.json() as Order[];
-            if(this.orderId === orderId){
-                if(this.orders.length > 0){
-                    this.editOrder(0);
-                }
-                else {
-                    this.currentOrder = undefined;
-                    this.orderId = -1;
-                    this.orderLines = [];
-                }
+            if(this.currentOrderId === orderId){
+                this.currentOrder = undefined;
+                this.currentOrderId = -1;
+                this.orderLines = [];
             }
         }, error => console.error(error));
 
@@ -64,10 +60,10 @@ export class HomeComponent {
 
 
     deleteOrderLine(orderLineId: number){
-        let currentOrder = this.orderId;
+        let currentOrderId = this.currentOrderId;
         this.http.delete(`${this.baseUrl}api/Order/DeleteOrderLine`,
-        {body: {OrderLineId: orderLineId, OrderId: this.orderId }}).subscribe(result => {
-            if(this.orderId === currentOrder){
+        {body: {OrderLineId: orderLineId, OrderId: this.currentOrderId }}).subscribe(result => {
+            if(this.currentOrderId === currentOrderId   ){
                 this.orderLines = result.json() as OrderLine[];    
             }
         }, error => console.error(error));
@@ -84,7 +80,7 @@ export class HomeComponent {
     addOrderLine(productId: number, quantity: number) {
 
         this.http.post(`${this.baseUrl}api/Order/AddOrderLine`, 
-        {OrderId: this.orderId, ProductId: productId, Quantity: quantity}).subscribe(result => 
+        {OrderId: this.currentOrderId, ProductId: productId, Quantity: quantity}).subscribe(result => 
             {
                 this.orderLines = result.json() as OrderLine[];
                 let totalPrice: number = 0;
@@ -107,26 +103,4 @@ export class HomeComponent {
             error => console.error(error));
     }
     
-}
-
-//TODO: move to separate classes
-interface Order {
-    id: number;
-    customerName: string;
-    totalPrice: number;
-}
-
-class OrderLine {
-    id: number;
-    orderId: number;
-    productId: number;
-    productName: string;
-    productPrice: number;
-    quantity: number;
-}
-
-class Product {
-    id: number;
-    name: string;
-    price: number;
 }

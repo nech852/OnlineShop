@@ -11,33 +11,33 @@
 <br>
 <table>
     <tr><td>Id</td><td>Customer Name</td><td>Total Price</td></tr>
-    <tr *ngFor="let order of orders">
-            <td>{{ order.id }}</td>
-            <td>{{ order.customerName }}</td>
-            <td>{{ order.totalPrice }}</td>
-            <td> <button (click)="editOrder(order.id)">Edit</button> </td>
-            <td> <button (click)="deleteOrder(order.id)">Delete</button> </td>
+    <tr *ngFor="let order of orders" [class.selected]="order.id === currentOrderId">
+        <td>{{ order.id }}</td>
+        <td>{{ order.customerName }}</td>
+        <td>{{ order.totalPrice }}</td>
+        <td> <button (click)="editOrder(order.id)">Edit</button> </td>
+        <td> <button (click)="deleteOrder(order.id)">Delete</button> </td>
     </tr>
 </table>
 
-
-<table>
+<div *ngIf="currentOrderId >= 0">
+    <table>
         <tr><td>Product</td><td>Price</td><td>Quantity</td><td>Total Price</td></tr>
         <tr *ngFor="let orderLine of orderLines">
-                <td>{{ orderLine.productName }}</td>
-                <td>{{ orderLine.productPrice }}</td>
-                <td>{{ orderLine.quantity }}</td>
-                <td>{{ orderLine.quantity * orderLine.productPrice }}</td>
-                <td> <button (click)="deleteOrderLine(orderLine.id)">Delete</button> </td>
+            <td>{{ orderLine.productName }}</td>
+            <td>{{ orderLine.productPrice }}</td>
+            <td>{{ orderLine.quantity }}</td>
+            <td>{{ orderLine.quantity * orderLine.productPrice }}</td>
+            <td> <button (click)="deleteOrderLine(orderLine.id)">Delete</button> </td>
         </tr>
     </table>
 
-<button (click)="addOrderLine(product.value*1, productQuantity.value*1)">Add Product</button><br>
-
-<select #product>
-    <option  *ngFor="let product of products" value="{{product.id}}"> 
-        {{product.name}} - {{product.price}}
-    </option>
-</select>
-<label>Count</label>
-<input #productQuantity value="1">
+    <button (click)="addOrderLine(product.value*1, productQuantity.value*1)">Add Product</button><br>
+    <select #product>
+        <option  *ngFor="let product of products" value="{{product.id}}"> 
+            {{product.name}} - {{product.price}}
+        </option>
+    </select>
+    <label>Count</label>
+    <input #productQuantity value="1">
+</div>
