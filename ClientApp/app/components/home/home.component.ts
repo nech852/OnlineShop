@@ -1,14 +1,16 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { Http, Response } from '@angular/http';
 import { Order, OrderLine, Product} from './entities';
+import { OrderService } from './order.service';
 
 @Component({
     selector: 'home',
     templateUrl: './home.component.html',
-    styleUrls: ['./home.component.css']
+    styleUrls: ['./home.component.css'],
+    providers: [OrderService]
 })
-export class HomeComponent {
-    
+export class HomeComponent implements OnInit {
+
     private baseUrl: string;
     orders: Order[];
     orderLines: OrderLine[];
@@ -17,15 +19,16 @@ export class HomeComponent {
     currentOrderId: number;
     searchMask: string;
 
-
-    constructor(private http: Http, @Inject('BASE_URL') baseUrl: string){
+    constructor(private http: Http, private orderService: OrderService,  @Inject('BASE_URL') baseUrl: string){
         this.baseUrl =  baseUrl;
-        this.performSearch('');
+    }
 
+    ngOnInit(){
+        this.performSearch('');
         this.http.get(`${this.baseUrl}api/Order/Products`).subscribe(result => {
             this.products = result.json() as Product[];
             }, error => console.error(error));
-    }
+     }
 
     performSearch(searchTerm: string){
         console.log(`User entered: ${searchTerm}`);
@@ -84,7 +87,7 @@ export class HomeComponent {
             {
                 this.orderLines = result.json() as OrderLine[];
                 let totalPrice: number = 0;
-                
+                //TODO: refactor this after unit tests are added
                 for(let orderLine of this.orderLines) {
                     for(let product of this.products) {
                         if(product.id === orderLine.productId){
