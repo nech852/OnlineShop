@@ -14,3 +14,7 @@ table {
 tr.selected{
     background: aquamarine;
 }
+
+.error{
+    color: red;
+}

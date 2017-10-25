@@ -1,7 +1,7 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { Component, OnInit } from '@angular/core';
 import { Order, OrderLine, Product} from './entities';
 import { OrderService } from './order.service';
+
 
 @Component({
     selector: 'home',
@@ -9,101 +9,154 @@ import { OrderService } from './order.service';
     styleUrls: ['./home.component.css'],
     providers: [OrderService]
 })
-export class HomeComponent implements OnInit {
-
-    private baseUrl: string;
+export class HomeComponent implements OnInit 
+{
     orders: Order[];
     orderLines: OrderLine[];
     products: Product[];
-    currentOrder?: Order;
     currentOrderId: number;
     searchMask: string;
+    controlsEnabled: boolean;
+    errorMsg: string;
+    
 
-    constructor(private http: Http, private orderService: OrderService,  @Inject('BASE_URL') baseUrl: string){
-        this.baseUrl =  baseUrl;
+    constructor(private orderService: OrderService)
+    {
     }
 
-    ngOnInit(){
-        this.performSearch('');
-        this.http.get(`${this.baseUrl}api/Order/Products`).subscribe(result => {
-            this.products = result.json() as Product[];
-            }, error => console.error(error));
-     }
+    ngOnInit()
+    {
+        this.orderService.getErrorOccuredEmitter().subscribe((err: Error) => {
+            this.handleError();
+        });
 
-    performSearch(searchTerm: string){
-        console.log(`User entered: ${searchTerm}`);
-        this.http.get(`${this.baseUrl}api/Order/Orders?mask=${searchTerm}`).subscribe(result => {
-            this.orders = result.json() as Order[];
-            this.searchMask = searchTerm;
-        }, error => console.error(error));
+        this.orderService.getOrders('').subscribe(result => 
+        {
+            this.initOrders(result);
+            this.orderService.getProducts().subscribe(result => 
+            {
+                this.products = result;
+                this.controlsEnabled = true;
+            }, error => this.handleError());
+        }, error => this.handleError());        
+    }
+
+    performSearch(searchMask: string)
+    {
+        this.controlsEnabled = false;
+        this.orderService.getOrders(searchMask).subscribe(result => 
+        {
+            this.initOrders(result);
+            this.controlsEnabled = true;
+        }, error => this.handleError());
+    }
+
+    addOrder(customerName: string)
+    {
+        this.controlsEnabled = false;
+        this.orderService.addOrder(customerName, this.searchMask).subscribe(result => 
+        {
+            this.orders = result;
+            this.validateCurrentOrderId();
+            this.controlsEnabled = true;
+        }, error => this.handleError());
+    }
+
+    deleteOrder(orderId: number)
+    {
+        this.controlsEnabled = false;
+        this.orderService.deleteOrder(orderId, this.searchMask).subscribe(result => 
+        {
+            this.orders = result;
+            this.validateCurrentOrderId();
+            this.controlsEnabled = true;
+        }, error => this.handleError());
     }
     
-    editOrder(orderId: number){
-        this.http.get(`${this.baseUrl}api/Order/OrderLines?orderId=${orderId}`).subscribe(result => {
-            this.orderLines = result.json() as OrderLine[];
-            let index = this.orders.findIndex(order => order.id === orderId);
-            this.currentOrder = this.orders[index];
+    editOrder(orderId: number)
+    {
+        this.controlsEnabled = false;
+        this.orderService.getOrderLines(orderId).subscribe(result => 
+        {
+            this.orderLines = result;
             this.currentOrderId = orderId;
-        }, error => console.error(error));
+            this.controlsEnabled = true;
+        }, error => this.handleError());
     }
 
-    deleteOrder(orderId: number){
-
-        this.http.delete(`${this.baseUrl}api/Order/DeleteOrder`,
-            {body: {OrderId: orderId, Mask: this.searchMask}}).subscribe(result => {
-            this.orders = result.json() as Order[];
-            if(this.currentOrderId === orderId){
-                this.currentOrder = undefined;
-                this.currentOrderId = -1;
-                this.orderLines = [];
-            }
-        }, error => console.error(error));
-
+    addOrderLine(productId: number, quantity: number) 
+    {
+        this.controlsEnabled = false;
+        let order: Order  = this.getOrder(this.currentOrderId);
+        this.orderService.addOrderLine(this.currentOrderId, productId, quantity).subscribe(result => 
+        {
+            this.orderLines = result;
+            order.totalPrice = this.calculateTotalPrice(result);
+            this.controlsEnabled = true;
+        }, error => this.handleError());
     }
 
-
-    deleteOrderLine(orderLineId: number){
-        let currentOrderId = this.currentOrderId;
-        this.http.delete(`${this.baseUrl}api/Order/DeleteOrderLine`,
-        {body: {OrderLineId: orderLineId, OrderId: this.currentOrderId }}).subscribe(result => {
-            if(this.currentOrderId === currentOrderId   ){
-                this.orderLines = result.json() as OrderLine[];    
-            }
-        }, error => console.error(error));
+    deleteOrderLine(orderLineId: number)
+    {
+        this.controlsEnabled = false;
+        let order: Order  = this.getOrder(this.currentOrderId);
+        this.orderService.deleteOrderLine(this.currentOrderId, orderLineId).subscribe(result => 
+        {
+            this.orderLines = result;
+            order.totalPrice = this.calculateTotalPrice(result);
+            this.controlsEnabled = true;
+        }, error => this.handleError());
     }
 
-    addOrder(customerName: string){
-        this.http.post(`${this.baseUrl}api/Order/AddOrder`, {CustomerName: customerName, Mask: this.searchMask}).subscribe(result => 
+    private handleError(){
+        this.errorMsg = "Unexpected error occured. Please reload the page";
+        this.controlsEnabled = false;
+    }
+
+    private initOrders(orders: Order[])
+    {
+        this.orders = orders;
+        this.validateCurrentOrderId();
+    }
+
+    private validateCurrentOrderId()
+    {
+        if(this.currentOrderId < 0)
+        {
+            return;
+        }
+
+        let index = this.orders.findIndex(order => order.id === this.currentOrderId);
+
+        if(index  < 0)
+        {
+            this.currentOrderId = -1;
+            this.orderLines = [];
+        }
+    }
+
+    private getOrder(orderId: number) : Order 
+    {
+        let index = this.orders.findIndex(order => order.id === orderId);
+        return this.orders[index];
+    }
+
+    private calculateTotalPrice(orderLines: OrderLine[]): number 
+    {
+        let totalPrice: number = 0;
+        //TODO: refactor this after unit tests are added
+        for(let orderLine of this.orderLines) 
+        {
+            for(let product of this.products) 
             {
-                this.orders = result.json() as Order[];
-            }, 
-            error => console.error(error));
+                if(product.id === orderLine.productId)
+                {
+                    totalPrice += orderLine.quantity * product.price;
+                    break;
+                }
+            }
+        }
+        return totalPrice;
     }
 
-    addOrderLine(productId: number, quantity: number) {
-
-        this.http.post(`${this.baseUrl}api/Order/AddOrderLine`, 
-        {OrderId: this.currentOrderId, ProductId: productId, Quantity: quantity}).subscribe(result => 
-            {
-                this.orderLines = result.json() as OrderLine[];
-                let totalPrice: number = 0;
-                //TODO: refactor this after unit tests are added
-                for(let orderLine of this.orderLines) {
-                    for(let product of this.products) {
-                        if(product.id === orderLine.productId){
-                            totalPrice += orderLine.quantity * product.price;
-                            break;
-                        }
-                    }
-                }
-
-                if(this.currentOrder === undefined){
-                    return;
-                }
-
-                this.currentOrder.totalPrice = totalPrice;
-            }, 
-            error => console.error(error));
-    }
-    
 }

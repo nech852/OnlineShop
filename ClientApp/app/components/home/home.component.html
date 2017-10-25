@@ -1,10 +1,14 @@
+<br>
+<span class="error">{{errorMsg}}</span>
+<br>
+<br>
 <input #searchTerm>
-<button (click)="performSearch(searchTerm.value)">Search</button><br>
+<button (click)="performSearch(searchTerm.value)" [disabled]="!controlsEnabled">Search</button><br>
 <br>
     Current Search Mask: {{searchMask}}
 <br>
 <br>
-<input #customerName><button (click)="addOrder(customerName.value)">Add Order</button><br>
+<input #customerName><button (click)="addOrder(customerName.value)" [disabled]="!controlsEnabled">Add Order</button><br>
 
 <br>
 <br>
@@ -15,8 +19,8 @@
         <td>{{ order.id }}</td>
         <td>{{ order.customerName }}</td>
         <td>{{ order.totalPrice }}</td>
-        <td> <button (click)="editOrder(order.id)">Edit</button> </td>
-        <td> <button (click)="deleteOrder(order.id)">Delete</button> </td>
+        <td> <button (click)="editOrder(order.id)" [disabled]="!controlsEnabled">Edit</button> </td>
+        <td> <button (click)="deleteOrder(order.id)" [disabled]="!controlsEnabled">Delete</button> </td>
     </tr>
 </table>
 
@@ -28,11 +32,11 @@
             <td>{{ orderLine.productPrice }}</td>
             <td>{{ orderLine.quantity }}</td>
             <td>{{ orderLine.quantity * orderLine.productPrice }}</td>
-            <td> <button (click)="deleteOrderLine(orderLine.id)">Delete</button> </td>
+            <td> <button (click)="deleteOrderLine(orderLine.id)" [disabled]="!controlsEnabled">Delete</button> </td>
         </tr>
     </table>
 
-    <button (click)="addOrderLine(product.value*1, productQuantity.value*1)">Add Product</button><br>
+    <button (click)="addOrderLine(product.value*1, productQuantity.value*1)" [disabled]="!controlsEnabled">Add Product</button><br>
     <select #product>
         <option  *ngFor="let product of products" value="{{product.id}}"> 
             {{product.name}} - {{product.price}}
