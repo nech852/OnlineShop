@@ -39,8 +39,9 @@ module.exports = (env) => {
         ].concat(isDevBuild ? [
             // Plugins that apply in development builds only
             new webpack.SourceMapDevToolPlugin({
-                filename: '[file].map', // Remove this line if you prefer inline source maps
-                moduleFilenameTemplate: path.relative(clientBundleOutputDir, '[resourcePath]') // Point sourcemap entries to the original file locations on disk
+                //filename: '[file].map', // Remove this line if you prefer inline source maps
+                //moduleFilenameTemplate: path.relative(clientBundleOutputDir, '[resourcePath]') // Point sourcemap entries to the original file locations on disk
+                test: /\.(ts|js)($|\?)/i
             })
         ] : [
             // Plugins that apply in production builds only

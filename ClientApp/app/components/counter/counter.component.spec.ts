@@ -3,6 +3,7 @@ import { assert } from 'chai';
 import { CounterComponent } from './counter.component';
 import { TestBed, async, ComponentFixture } from '@angular/core/testing';
 
+
 let fixture: ComponentFixture<CounterComponent>;
 
 describe('Counter component', () => {

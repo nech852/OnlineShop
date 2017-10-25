@@ -2,6 +2,7 @@ import { Injectable, Inject, EventEmitter } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Http, Response } from '@angular/http';
 import { Order, OrderLine, Product} from './entities';
+//TODO: Should I insert only part of RxJs??
 import 'rxjs/Rx';
 
 @Injectable()
