@@ -18,8 +18,6 @@ namespace OnlineShop.Data
             
             modelBuilder.Entity<ProductDto>().ToTable("Product");
             modelBuilder.Entity<OrderLineDto>().ToTable("OrderLine");
-            //.HasOne(l => l.Order).WithMany(o => o.OrderLines).OnDelete(DeleteBehavior.Cascade);
-            
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
