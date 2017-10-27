@@ -16,7 +16,7 @@ namespace Test
     public class OrderControllerTests
     {
         [TestMethod]
-       sfdsf public async Task TestMethod1()
+       public async Task TestMethod1()
        // public void TestMethod1()
         {
            // var migrator = new DbMigrator(configuration);
