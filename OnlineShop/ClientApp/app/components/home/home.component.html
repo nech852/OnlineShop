@@ -18,7 +18,7 @@
     <tr *ngFor="let order of orders" [class.selected]="order.id === currentOrderId" class="orderRow">
         <td class="idCell">{{ order.id }}</td>
         <td class="nameCell">{{ order.customerName }}</td>
-        <td class="totalPriceCell">{{ order.totalPrice }}</td>
+        <td class="totalPriceCell">{{ order.totalPrice.toFixed(2)  }}</td>
         <td> <button class="editOrderButton" (click)="editOrder(order.id)" [disabled]="!controlsEnabled">Edit</button> </td>
         <td> <button class="deleteOrderButton" (click)="deleteOrder(order.id)" [disabled]="!controlsEnabled">Delete</button> </td>
     </tr>
@@ -29,9 +29,9 @@
         <tr><td>Product</td><td>Price</td><td>Quantity</td><td>Total Price</td></tr>
         <tr *ngFor="let orderLine of orderLines" class="orderLineRow">
             <td class ="orderLineProductCell">{{ orderLine.productName }}</td>
-            <td class="orderLinePriceCell">{{ orderLine.productPrice }}</td>
+            <td class="orderLinePriceCell">{{ orderLine.productPrice.toFixed(2) }}</td>
             <td class="orderLineQuantityCell">{{ orderLine.quantity }}</td>
-            <td class="orderLineTotalPrice">{{ orderLine.quantity * orderLine.productPrice }}</td>
+            <td class="orderLineTotalPrice">{{ (orderLine.quantity * orderLine.productPrice).toFixed(2) }}</td>
             <td> <button class="deleteOrderLineButton" (click)="deleteOrderLine(orderLine.id)" [disabled]="!controlsEnabled">Delete</button> </td>
         </tr>
     </table>

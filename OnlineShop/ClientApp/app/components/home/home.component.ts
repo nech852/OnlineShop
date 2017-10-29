@@ -143,8 +143,14 @@ export class HomeComponent implements OnInit
 
     private getOrder(orderId: number) : Order 
     {
-        let index = this.orders.findIndex(order => order.id === orderId);
-        return this.orders[index];
+        let order: Order | undefined = this.orders.find(order => order.id === orderId);
+        if(order === undefined)
+        {
+            throw new Error(`Can not find order with id - ${orderId}`);
+        }
+        // let index = this.orders.findIndex(order => order.id === orderId);
+        // return this.orders[index];
+        return order;
     }
 
     private calculateTotalPrice(orderLines: OrderLine[]): number 
@@ -153,14 +159,13 @@ export class HomeComponent implements OnInit
         //TODO: refactor this after unit tests are added
         for(let orderLine of this.orderLines) 
         {
-            for(let product of this.products) 
+            let product = this.products.find(pr => pr.id === orderLine.productId);
+            if(product === undefined)
             {
-                if(product.id === orderLine.productId)
-                {
-                    totalPrice += orderLine.quantity * product.price;
-                    break;
-                }
+                throw new Error(`Can not find product with id - ${orderLine.productId}`);
             }
+            totalPrice += orderLine.quantity * product.price;
+
         }
         return totalPrice;
     }
