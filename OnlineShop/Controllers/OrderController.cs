@@ -19,7 +19,7 @@ namespace OnlineShop.Controllers
         }
 
         [HttpGet("Orders")]
-        public async Task<IEnumerable<Order>> GetOrders(string mask)
+        public async Task<List<Order>> GetOrders(string mask = null)
         {
             IQueryable<Order> allOrders = _orderContext.Orders.Select(order => new Order {Id = order.Id,
                 CustomerName = order.CustomerName, 
@@ -32,7 +32,7 @@ namespace OnlineShop.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IEnumerable<Order>> AddOrder([FromBody] NewOrderArgs args)
+        public async Task<List<Order>> AddOrder([FromBody] NewOrderArgs args)
         {
             _orderContext.Orders.Add(new OrderDto { CustomerName = args.CustomerName});
             await _orderContext.SaveChangesAsync();
@@ -41,52 +41,39 @@ namespace OnlineShop.Controllers
 
 
         [HttpDelete("[action]")]
-        public async Task<IEnumerable<Order>> DeleteOrder([FromBody] DeleteOrderArgs args)
+        public async Task<List<Order>> DeleteOrder([FromBody] DeleteOrderArgs args)
         {
-            // OrderDto orderDto = new OrderDto { Id = args.OrderId };
-            // _orderContext.Entry(orderDto).State = EntityState.Deleted;
             OrderDto orderDto = _orderContext.Orders.Include(ord => ord.OrderLines).Single(ord => ord.Id == args.OrderId);
             _orderContext.RemoveRange(orderDto.OrderLines);
             _orderContext.Remove(orderDto);
             await _orderContext.SaveChangesAsync();
             return await GetOrders(args.Mask);
         }
-        
-        [HttpDelete("[action]")]
-        public async Task<IEnumerable<OrderLine>> DeleteOrderLine([FromBody] DeleteOrderLineArgs args)
-        {
-            OrderLineDto orderLine = new OrderLineDto { Id = args.OrderLineId };
-            _orderContext.Entry(orderLine).State = EntityState.Deleted;
-            //TODO: handle situations when order or order line is not found
-            await _orderContext.SaveChangesAsync();
-            return await GetOrderLines(args.OrderId);
-        }
-
 
         [HttpGet("Products")]
-        public async Task<IEnumerable<ProductDto>> GetProducts()
+        public async Task<List<ProductDto>> GetProducts()
         {
             var result = await _orderContext.Products.ToListAsync();
             return result;
         }
 
         [HttpGet("OrderLines")]
-        public async Task<IEnumerable<OrderLine>> GetOrderLines(int orderId)
+        public async Task<List<OrderLine>> GetOrderLines(long orderId)
         {
             return await _orderContext.OrderLines.Where(ol => ol.OrderId == orderId).
-                       Select(ol => new OrderLine()
-                        {
-                            Id=ol.Id, OrderId = ol.OrderId, ProductId = ol.ProductId,
-                            Quantity = ol.Quantity, 
-                            ProductName = ol.Product.Name,
-                            ProductPrice = ol.Product.Price,
-                        }).ToListAsync();
+                Select(ol => new OrderLine()
+                {
+                    Id=ol.Id, OrderId = ol.OrderId, ProductId = ol.ProductId,
+                    Quantity = ol.Quantity, 
+                    ProductName = ol.Product.Name,
+                    ProductPrice = ol.Product.Price,
+                }).ToListAsync();
         }
         
         [HttpPost("[action]")]
-        public async Task<IEnumerable<OrderLine>> AddOrderLine([FromBody] NewOrderLineArgs args)
+        public async Task<List<OrderLine>> AddOrderLine([FromBody] NewOrderLineArgs args)
         {       
-            OrderLineDto orderLine = _orderContext.OrderLines.SingleOrDefault(line => line.OrderId == args.OrderId
+            OrderLineDto orderLine = await _orderContext.OrderLines.SingleOrDefaultAsync(line => line.OrderId == args.OrderId
                 && line.ProductId == args.ProductId);
              if(orderLine == null) 
              {
@@ -100,6 +87,16 @@ namespace OnlineShop.Controllers
              await _orderContext.SaveChangesAsync();
 
              return await GetOrderLines(args.OrderId);
+        }
+
+        [HttpDelete("[action]")]
+        public async Task<List<OrderLine>> DeleteOrderLine([FromBody] DeleteOrderLineArgs args)
+        {
+            OrderLineDto orderLine  =await _orderContext.OrderLines.SingleAsync(oL => oL.Id == args.OrderLineId);
+            _orderContext.OrderLines.Remove(orderLine);
+            //TODO: handle situations when order or order line is not found
+            await _orderContext.SaveChangesAsync();
+            return await GetOrderLines(args.OrderId);
         }
 
     }

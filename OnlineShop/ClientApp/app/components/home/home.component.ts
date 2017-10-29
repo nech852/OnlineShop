@@ -46,6 +46,7 @@ export class HomeComponent implements OnInit
         this.controlsEnabled = false;
         this.orderService.getOrders(searchMask).subscribe(result => 
         {
+            this.searchMask = searchMask;
             this.initOrders(result);
             this.controlsEnabled = true;
         }, error => this.handleError());
