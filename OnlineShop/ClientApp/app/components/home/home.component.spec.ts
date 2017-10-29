@@ -46,11 +46,11 @@ describe('Home component', () => {
         const firstOrderRow = orderRows[0];
         expect(firstOrderRow.querySelector(".idCell").innerText).toEqual("1");
         expect(firstOrderRow.querySelector(".nameCell").innerText).toEqual("Jack");
-        expect(firstOrderRow.querySelector(".totalPriceCell").innerText).toEqual("5");
+        expect(firstOrderRow.querySelector(".totalPriceCell").innerText).toEqual("5.00");
         const secondOrderRow = orderRows[1];
         expect(secondOrderRow.querySelector(".idCell").innerText).toEqual("2");
         expect(secondOrderRow.querySelector(".nameCell").innerText).toEqual("Mike");
-        expect(secondOrderRow.querySelector(".totalPriceCell").innerText).toEqual("8");
+        expect(secondOrderRow.querySelector(".totalPriceCell").innerText).toEqual("8.00");
     }));
 
 
@@ -111,7 +111,7 @@ describe('Home component', () => {
         fixture.detectChanges();
         orderLineRows = fixture.nativeElement.querySelectorAll('.orderLineTable .orderLineRow');
         expect(orderLineRows.length).toEqual(2);
-        expect(firstOrderRow.querySelector('.totalPriceCell').innerText).toEqual("94");
+        expect(firstOrderRow.querySelector('.totalPriceCell').innerText).toEqual("94.00");
     }));
         
 
