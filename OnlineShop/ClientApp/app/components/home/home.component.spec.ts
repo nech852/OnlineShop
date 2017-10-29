@@ -53,6 +53,7 @@ describe('Home component', () => {
         expect(secondOrderRow.querySelector(".totalPriceCell").innerText).toEqual("8");
     }));
 
+
     it('Edit Order', (() => {
         
         const orderSpy = spyOn(orderServiceStub, 'getOrders').and.returnValue(

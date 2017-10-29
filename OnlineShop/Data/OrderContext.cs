@@ -15,7 +15,6 @@ namespace OnlineShop.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<OrderDto>().ToTable("Order");
-            
             modelBuilder.Entity<ProductDto>().ToTable("Product");
             modelBuilder.Entity<OrderLineDto>().ToTable("OrderLine");
         }

@@ -87,6 +87,11 @@ export class HomeComponent implements OnInit
 
     addOrderLine(productId: number, quantity: number) 
     {
+        if(quantity < 0)
+        {
+            this.errorMsg = "Quantity should be positive number";
+            return;
+        }
         this.controlsEnabled = false;
         let order: Order  = this.getOrder(this.currentOrderId);
         this.orderService.addOrderLine(this.currentOrderId, productId, quantity).subscribe(result => 
