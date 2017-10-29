@@ -92,9 +92,14 @@ namespace OnlineShop.Controllers
         [HttpDelete("[action]")]
         public async Task<List<OrderLine>> DeleteOrderLine([FromBody] DeleteOrderLineArgs args)
         {
-            OrderLineDto orderLine  =await _orderContext.OrderLines.SingleAsync(oL => oL.Id == args.OrderLineId);
+            OrderLineDto orderLine  = await _orderContext.OrderLines.SingleOrDefaultAsync(oL => oL.Id == args.OrderLineId);
+            if(orderLine == null)
+            {
+                throw new Exception($"Can not find order line with id {args.OrderLineId} and order with id {args.OrderId}");
+            }
+
             _orderContext.OrderLines.Remove(orderLine);
-            //TODO: handle situations when order or order line is not found
+            
             await _orderContext.SaveChangesAsync();
             return await GetOrderLines(args.OrderId);
         }

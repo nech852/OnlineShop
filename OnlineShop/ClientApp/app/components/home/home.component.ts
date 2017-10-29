@@ -148,15 +148,12 @@ export class HomeComponent implements OnInit
         {
             throw new Error(`Can not find order with id - ${orderId}`);
         }
-        // let index = this.orders.findIndex(order => order.id === orderId);
-        // return this.orders[index];
         return order;
     }
 
     private calculateTotalPrice(orderLines: OrderLine[]): number 
     {
         let totalPrice: number = 0;
-        //TODO: refactor this after unit tests are added
         for(let orderLine of this.orderLines) 
         {
             let product = this.products.find(pr => pr.id === orderLine.productId);
